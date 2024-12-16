@@ -40,5 +40,18 @@ export class UserController extends Contorller {
         Response.status(resp.code).send(resp)
     }
 
+    public async deleteOne(Request: Request, Response: Response) {
+        const { userName } = Request.params;
+        const resp = await this.service.deleteOne(userName);
+        Response.status(resp.code).send(resp);
+    }
+
+    public async updateOne(Request: Request, Response: Response) {
+        const { userName } = Request.params;
+        const updateData = Request.body;
+
+        const resp = await this.service.updateOne(userName, updateData);
+        Response.status(resp.code).send(resp);
+    }
 
 }
