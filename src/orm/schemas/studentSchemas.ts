@@ -9,7 +9,6 @@ export const studentsSchemas = new Schema<Student>({
     grade:{ type: String, required: true },
     class:{ type: String, required: true },
     Email:{ type: String, required: true },
-    absences:{ type: Number, required: false },
-});
-
+    absences: { type: Number, required: false, default: 0 } 
+}, { versionKey: false }); 
 export const studentsModel = model<Student>('Students', studentsSchemas, 'studentslist');

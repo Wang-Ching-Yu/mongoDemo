@@ -6,6 +6,7 @@ import { Document } from "mongoose"
 import { MongoDB } from "../utils/MongoDB";
 import { DBResp } from "../interfaces/DBResp";
 import { resp } from "../utils/resp";
+import { randomInt } from "crypto";
 
 type seatInfo = {
     schoolName: string,
@@ -50,6 +51,8 @@ export class UserService extends Service {
                     if (nameValidator === "驗證通過") {
                         info.sid = String(current.length + 1);
                         info._id = undefined;
+                        info.absences = randomInt(0, 6);
+                        logger.info(`Generated absences: ${info.absences}`);
                         const res = new studentsModel(info);
                         resp.body = await res.save();
                     } else {
@@ -94,14 +97,13 @@ export class UserService extends Service {
         }
 
         // 驗證座號(正則不想寫可以給 gpt 寫, 記得測試就好)
-        const seatNumberPattern = /^\d{4}$/; // 驗證4個數字
-
+        const seatNumberPattern = /^\d{4}$/;
         if (!seatNumberPattern.test(info.seatNumber)) {
             return '座號格式不正確，必須為四位數字。';
         }
 
-        if (await this.existingSeatNumbers(info.seatNumber)) {
-            return '座號已存在'
+        if (await this.existingSeatNumbers(info.department, info.seatNumber)) {
+            return '座號已存在';
         }
 
         return '驗證通過'
@@ -138,19 +140,21 @@ export class UserService extends Service {
      * @param SeatNumber 
      * @returns boolean
      */
-    public async existingSeatNumbers(SeatNumber: string): Promise<boolean> {
+    public async existingSeatNumbers(department: string, seatNumber: string): Promise<boolean> {
         const students = await this.getAllStudents();
-        let exist = false
+        let exist = false;
+
         if (students) {
             students.forEach((student) => {
-                const info = this.userNameFormator(student.userName)
-                if (info.seatNumber === SeatNumber) {
+                const info = this.userNameFormator(student.userName);
+                if (info.department === department && info.seatNumber === seatNumber) {
                     exist = true;
                 }
-            })
+            });
         }
-        return exist
+        return exist;
     }
+
 
     public async deleteOne(userName: string): Promise<resp<string>> {
         const res: resp<string> = {
@@ -160,7 +164,13 @@ export class UserService extends Service {
         };
 
         try {
-            const result = await studentsModel.deleteOne({ userName });
+            const cleanUserName = userName.trim().replace(/^:/, "");
+            logger.info(`Deleting userName: ${cleanUserName}`);
+
+            const result = await studentsModel.deleteOne({
+                userName: { $regex: `^${cleanUserName}$`, $options: "i" },
+            });
+
             if (result.deletedCount === 1) {
                 res.message = "Delete success";
             } else {
@@ -170,6 +180,7 @@ export class UserService extends Service {
         } catch (error) {
             res.code = 500;
             res.message = "Delete failed";
+            logger.error(`Delete error`);
         }
 
         return res;
@@ -182,7 +193,6 @@ export class UserService extends Service {
             body: undefined,
         };
 
-        // 檢查是否有提供更新資料
         if (Object.keys(updateData).length === 0) {
             res.code = 400;
             res.message = "No update data provided";
@@ -190,7 +200,12 @@ export class UserService extends Service {
         }
 
         try {
-            const user = await studentsModel.findOne({ userName });
+            const cleanUserName = userName.trim().replace(/^:/, ""); // 移除開頭的冒號和空格
+
+            const user = await studentsModel.findOne({
+                userName: { $regex: `^${cleanUserName}$`, $options: "i" }
+            });
+
             if (user) {
                 Object.assign(user, updateData);
                 const updatedUser = await user.save();
@@ -203,7 +218,9 @@ export class UserService extends Service {
         } catch (error) {
             res.code = 500;
             res.message = "Update failed";
+            logger.error(`Update error`);
         }
+
 
         return res;
     }

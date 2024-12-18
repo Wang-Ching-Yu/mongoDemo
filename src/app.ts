@@ -18,8 +18,9 @@ export const DB = new MongoDB({
 
 app.use(cors({
   // "origin": "https://sec.ethci.app",
-  "origin": "*",
+  origin: "http://localhost:5173", // 指定前端 URL
   "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+  "credentials": true, // 啟用跨域請求攜帶認證 (cookies, Authorization headers)
   "preflightContinue": false,
   "optionsSuccessStatus": 200,
   "exposedHeaders": ['Content-Disposition']

@@ -41,7 +41,7 @@ export class UserRoute extends Route {
 
         this.router.put(`${this.url}updateOne/:userName`, (req, res) => {
             this.Contorller.updateOne(req, res);
-        });        
+        });           
 
     }
 
