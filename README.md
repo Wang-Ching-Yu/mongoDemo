@@ -43,3 +43,99 @@
 4. **啟動伺服器**
    ```bash
    npm run dev
+
+---
+
+## API 規格說明
+
+### API 路由
+
+#### 1. **取得所有學生資料**
+- **方法**：GET
+- **路徑**：`/api/v1/user/findAll`
+- **回應範例**：
+  ```json
+  {
+    "code": 200,
+    "message": "",
+    "body": {
+            "_id": "67629f7104756b2fb3f8c7ed",
+            "userName": "tkuib0163",
+            "sid": "51",
+            "name": "王敬瑜",
+            "department": "國際企業系",
+            "grade": "四年級",
+            "class": "B",
+            "Email": "410550163@gms.tku.edu.tw",
+            "absences": 1
+    }
+  }
+
+#### 2. **新增學生資料**
+- **方法**：POST
+- **路徑**：`/api/v1/user/insertOne`
+- **請求範例**：
+  ```json
+  {
+    "userName": "tkuib0163",
+    "name": "王敬瑜",
+    "department": "國際企業系",
+    "grade": "四年級",
+    "class":"A",
+    "Email": "410550163@gms.tku.edu.tw"
+  }
+- **回應範例**：
+  ```json
+  {
+  "code": 200,
+    "message": "",
+    "body": {
+        "userName": "tkuib0163",
+        "sid": "51",
+        "name": "王敬瑜",
+        "department": "國際企業系",
+        "grade": "四年級",
+        "class": "A",
+        "Email": "410550163@gms.tku.edu.tw",
+        "absences": 1,
+        "_id": "67629f7104756b2fb3f8c7ed"
+    }
+  }
+
+
+#### 3. **更新學生資料**
+- **方法**：PATCH
+- **路徑**：`/api/v1/user/updateOne/:userName`
+- **請求範例**：
+  ```json
+  {
+     "class": "B"
+  }
+- **回應範例**：
+  ```json
+  {
+   "code": 200,
+    "message": "Update success",
+    "body": {
+        "_id": "67629f7104756b2fb3f8c7ed",
+        "userName": "tkuib0163",
+        "sid": "51",
+        "name": "王敬瑜",
+        "department": "國際企業系",
+        "grade": "四年級",
+        "class": "B",
+        "Email": "410550163@gms.tku.edu.tw",
+        "absences": 1
+    }
+  }
+
+#### 4. **刪除學生資料**
+- **方法**：DELETE
+- **路徑**：`/api/v1/user/deleteOne/:userName`
+- **回應範例**：
+  ```json
+  {
+    "code": 200,
+    "message": "Delete success",
+    "body": ""
+  }
